@@ -9,12 +9,10 @@
     //UI constructor
     function UI() { }
 
-    let books;
+    //Store constructor
+    function Store() {
 
-    document.addEventListener("DOMContentLoaded", function () {
-        const ui = new UI();
-        ui.getBooksFromLocalStorage();
-    });
+    }
 
     UI.prototype.addBookToList = (book) => {
         const list = document.querySelector(".list");
@@ -52,37 +50,44 @@
         }
     }
 
-    UI.prototype.setBooksInLocalStorage = (book) => {
-        checkStorage();
+    Store.prototype.getBooksFromLocalStorage = function () {
+        let books;
+        if (localStorage.getItem("books") === null) {
+            books = [];
+        } else {
+            books = JSON.parse(localStorage.getItem("books"));
+        }
+        return books;
+    }
+
+    Store.prototype.displayBooks = function () {
+        const books = this.getBooksFromLocalStorage();
+        const ui = new UI();
+        books.map(book => {
+            ui.addBookToList(book);
+        });
+    }
+
+    Store.prototype.setBooksInLocalStorage = function (book) {
+        const books = this.getBooksFromLocalStorage();
         books.push(book);
         localStorage.setItem("books", JSON.stringify(books));
     }
 
-    UI.prototype.getBooksFromLocalStorage = () => {
-        checkStorage();
-        books.map(book => {
-            const list = document.querySelector(".list");
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${book.title}</td>
-                <td>${book.author}</td>
-                <td>${book.isbn}</td>
-                <td><span class="delete fa fa-times"></span></td>
-            `;
-            list.appendChild(row);
-        });
-    }
-
-    UI.prototype.deleteBooksFromLocalStorage = (target) => {
-        checkStorage();
+    Store.prototype.deleteBooksFromLocalStorage = function (target) {
+        const books = this.getBooksFromLocalStorage();
         books.forEach((book, index) => {
             if (book.title === target.parentElement.parentElement.children[index].textContent) {
                 books.splice(index, 1);
             }
         });
-
         localStorage.setItem("books", JSON.stringify(books));
     }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const store = new Store();
+        store.displayBooks();
+    });
 
     // Event listener
     document.querySelector("#book-form").addEventListener("submit", function (e) {
@@ -113,25 +118,18 @@
             ui.clearInputs();
 
             //Set books to local storage
-            ui.setBooksInLocalStorage(book);
+            const store = new Store();
+            store.setBooksInLocalStorage(book);
         }
     });
 
     document.querySelector(".list").addEventListener("click", function (e) {
-        e.preventDefault();
         const ui = new UI();
         ui.deleteBookFromList(e.target);
         ui.showAlert("Book removed!", "alert-success");
 
         //Delete books from local storage
-        ui.deleteBooksFromLocalStorage(e.target);
+        const store = new Store();
+        store.deleteBooksFromLocalStorage(e.target);
     });
-
-    function checkStorage() {
-        if (localStorage.getItem("books") === null) {
-            books = [];
-        } else {
-            books = JSON.parse(localStorage.getItem("books"));
-        }
-    }
 })();
