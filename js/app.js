@@ -8,7 +8,7 @@ function Book(title, author, isbn) {
 //UI constructor
 function UI() { }
 
-UI.prototype.addBookToList = function (book) {
+UI.prototype.addBookToList = (book) => {
     const list = document.querySelector(".list");
     const row = document.createElement("tr");
 
@@ -16,13 +16,13 @@ UI.prototype.addBookToList = function (book) {
         <td>${book.title}</td>
         <td>${book.author}</td>
         <td>${book.isbn}</td>
-        <td><a href="#" class="delete">X</a></td>
+        <td><span class="delete fa fa-times"></span></td>
         `;
 
     list.appendChild(row);
 }
 
-UI.prototype.showAlert = function (message, className) {
+UI.prototype.showAlert = (message, className) => {
     const heading = document.querySelector(".heading");
     const div = document.createElement("div");
     div.className = `alert ${className}`;
@@ -34,11 +34,18 @@ UI.prototype.showAlert = function (message, className) {
     }, 3000);
 }
 
-UI.prototype.clearInputs = function () {
+UI.prototype.clearInputs = () => {
     document.querySelector("#title").value = "";
     document.querySelector("#author").value = "";
     document.querySelector("#isbn").value = "";
 }
+
+UI.prototype.deleteBookFromList = (target) => {
+    if (target.className = "delete") {
+        target.parentElement.parentElement.remove();
+    }
+}
+
 // Event listener
 document.querySelector("#book-form").addEventListener("submit", function (e) {
     e.preventDefault();
@@ -67,10 +74,11 @@ document.querySelector("#book-form").addEventListener("submit", function (e) {
         //Clear inputs
         ui.clearInputs();
     }
-
-
-
-
 });
 
-
+document.querySelector(".list").addEventListener("click", function (e) {
+    e.preventDefault();
+    const ui = new UI();
+    ui.deleteBookFromList(e.target);
+    ui.showAlert("Book removed!", "alert-success");
+});
